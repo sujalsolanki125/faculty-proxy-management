@@ -20,7 +20,7 @@ function AuthTest() {
   useEffect(() => {
     const checkServer = async () => {
       try {
-        const result = await axios.get('http://localhost:5000/health', { 
+        const result = await axios.get(`${import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:5000'}/health`, { 
           timeout: 5000 
         })
         setServerStatus(`✅ Connected - ${result.data.status}`)
@@ -37,7 +37,7 @@ function AuthTest() {
     setLoading(true)
     
     try {
-      const result = await axios.post('http://localhost:5000/api/auth/test-login', formData, {
+      const result = await axios.post(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'}/auth/test-login`, formData, {
         timeout: 10000,
         headers: {
           'Content-Type': 'application/json'
