@@ -1,0 +1,19 @@
+{
+  "name": "faculty-proxy-backend",
+  "version": "1.0.0",
+  "description": "Faculty Proxy Management System Backend API",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "build": "echo 'No build step required for Node.js'",
+    "railway:start": "node src/index.js"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "keywords": ["faculty", "proxy", "management", "education", "api"],
+  "author": "Faculty Management Team",
+  "license": "MIT"
+}

@@ -1,0 +1,224 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User Management
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  password    String
+  firstName   String
+  lastName    String
+  phoneNumber String?
+  role        UserRole @default(FACULTY)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  department      Department? @relation(fields: [departmentId], references: [id])
+  departmentId    String?
+  subjects        UserSubject[]
+  proxyRequests   ProxyRequest[] @relation("RequestingFaculty")
+  proxyAssignments ProxyRequest[] @relation("ProxyFaculty")
+  hodApprovals    ProxyRequest[] @relation("HODApprover")
+  leaveBalance    LeaveBalance?
+  timetableSlots  TimetableSlot[]
+  notifications   Notification[]
+  auditLogs       AuditLog[]
+
+  @@map("users")
+}
+
+model Department {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  code        String   @unique
+  description String?
+  hodId       String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  users     User[]
+  subjects  Subject[]
+
+  @@map("departments")
+}
+
+model Subject {
+  id           String   @id @default(cuid())
+  name         String
+  code         String   @unique
+  credits      Int      @default(3)
+  semester     Int?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  department      Department @relation(fields: [departmentId], references: [id])
+  departmentId    String
+  users           UserSubject[]
+  timetableSlots  TimetableSlot[]
+  proxyRequests   ProxyRequest[]
+
+  @@map("subjects")
+}
+
+model UserSubject {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // Relations
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  subjectId String
+
+  @@unique([userId, subjectId])
+  @@map("user_subjects")
+}
+
+// Proxy Request Management
+model ProxyRequest {
+  id              String              @id @default(cuid())
+  date            DateTime
+  lectureSlot     Int // 1-8 representing lecture periods
+  reason          String
+  status          ProxyRequestStatus  @default(PENDING)
+  priority        Int                 @default(0) // For matching algorithm
+  requestedAt     DateTime            @default(now())
+  respondedAt     DateTime?
+  hodApprovedAt   DateTime?
+  completedAt     DateTime?
+  remarks         String?
+  
+  // Relations
+  requestingFaculty   User    @relation("RequestingFaculty", fields: [requestingFacultyId], references: [id])
+  requestingFacultyId String
+  proxyFaculty        User?   @relation("ProxyFaculty", fields: [proxyFacultyId], references: [id])
+  proxyFacultyId      String?
+  hodApprover         User?   @relation("HODApprover", fields: [hodApproverId], references: [id])
+  hodApproverId       String?
+  subject             Subject @relation(fields: [subjectId], references: [id])
+  subjectId           String
+
+  @@map("proxy_requests")
+}
+
+// Leave Management
+model LeaveBalance {
+  id                String   @id @default(cuid())
+  casualLeaves      Int      @default(12)
+  sickLeaves        Int      @default(12)
+  earnedLeaves      Int      @default(30)
+  usedCasualLeaves  Int      @default(0)
+  usedSickLeaves    Int      @default(0)
+  usedEarnedLeaves  Int      @default(0)
+  year              Int
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String @unique
+
+  @@unique([userId, year])
+  @@map("leave_balances")
+}
+
+// Timetable Management
+model TimetableSlot {
+  id          String      @id @default(cuid())
+  dayOfWeek   Int         // 1-7 (Monday to Sunday)
+  lectureSlot Int         // 1-8 representing lecture periods
+  startTime   String      // HH:MM format
+  endTime     String      // HH:MM format
+  room        String?
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  faculty     User    @relation(fields: [facultyId], references: [id])
+  facultyId   String
+  subject     Subject @relation(fields: [subjectId], references: [id])
+  subjectId   String
+
+  @@unique([facultyId, dayOfWeek, lectureSlot])
+  @@map("timetable_slots")
+}
+
+// Notification System
+model Notification {
+  id        String             @id @default(cuid())
+  title     String
+  message   String
+  type      NotificationType   @default(INFO)
+  isRead    Boolean            @default(false)
+  data      Json?              // Additional data as JSON
+  createdAt DateTime           @default(now())
+
+  // Relations
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+
+  @@map("notifications")
+}
+
+// Audit Trail
+model AuditLog {
+  id        String     @id @default(cuid())
+  action    String     // CREATE, UPDATE, DELETE, etc.
+  entity    String     // User, ProxyRequest, etc.
+  entityId  String     // ID of the affected entity
+  oldData   Json?      // Previous state (for updates)
+  newData   Json?      // New state
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime   @default(now())
+
+  // Relations
+  user      User?  @relation(fields: [userId], references: [id])
+  userId    String?
+
+  @@map("audit_logs")
+}
+
+// Enums
+enum UserRole {
+  FACULTY
+  HOD
+  ADMIN
+}
+
+enum ProxyRequestStatus {
+  PENDING
+  PROXY_ACCEPTED
+  PROXY_DECLINED
+  HOD_APPROVED
+  HOD_REJECTED
+  COMPLETED
+  CANCELLED
+}
+
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+  PROXY_REQUEST
+  PROXY_RESPONSE
+  HOD_DECISION
+  SYSTEM
+}
