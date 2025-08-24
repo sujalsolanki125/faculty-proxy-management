@@ -1,29 +1,40 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
 const LoginPage = () => {
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
-    email: 'alice.faculty@faculty.edu',
-    password: 'Faculty@123'
+    email: 'john.doe@university.edu',
+    password: 'password123'
   })
   const [error, setError] = useState('')
-  const { login, isLoading } = useAuth()
+  const { login, isLoading, user } = useAuth()
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard')
+    }
+  }, [user, navigate])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     
     const result = await login(formData.email, formData.password)
-    if (!result.success) {
+    if (result.success) {
+      // Navigate to dashboard on successful login
+      navigate('/dashboard')
+    } else {
       setError(result.error || 'Login failed')
     }
   }
 
   const demoUsers = [
-    { email: 'admin@faculty.edu', password: 'Admin@123', role: 'Admin' },
-    { email: 'hod.cse@faculty.edu', password: 'Hod@123', role: 'HOD' },
-    { email: 'alice.faculty@faculty.edu', password: 'Faculty@123', role: 'Faculty' },
-    { email: 'bob.faculty@faculty.edu', password: 'Faculty@123', role: 'Faculty' }
+    { email: 'admin@university.edu', password: 'admin123', role: 'Admin' },
+    { email: 'jane.smith@university.edu', password: 'password123', role: 'HOD' },
+    { email: 'john.doe@university.edu', password: 'password123', role: 'Faculty' },
   ]
 
   return (
