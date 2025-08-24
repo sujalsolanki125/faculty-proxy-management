@@ -5,6 +5,8 @@ import DashboardLayout from './components/DashboardLayout'
 import FacultyDashboard from './pages/FacultyDashboard'
 import ProxyRequests from './pages/ProxyRequests'
 import HODApprovals from './pages/HODApprovals'
+import DemoNavigation from './pages/DemoNavigation'
+import QuickAccess from './pages/QuickAccess'
 import AuthTest from './components/AuthTest'
 import { useState } from 'react'
 
@@ -55,6 +57,8 @@ function App() {
       <Router>
         <div className="min-h-screen bg-gray-50">
           <Routes>
+            <Route path="/" element={<QuickAccess />} />
+            <Route path="/demo" element={<DemoNavigation />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/test" element={<AuthTest />} />
             <Route 
