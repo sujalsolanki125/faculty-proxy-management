@@ -9,7 +9,6 @@
     "VITE_APP_NAME": "Faculty Proxy Management System",
     "VITE_ENVIRONMENT": "production"
   },
-  "functions": {},
   "headers": [
     {
       "source": "/api/(.*)",
