@@ -72,14 +72,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       return { success: false, error: 'Invalid email or password' }
     }
     
-    // Demo passwords - updated to match our demo accounts
+    // Demo passwords - matching mock users
     const demoPasswords: { [key: string]: string } = {
-      'admin@university.edu': 'admin123',
-      'jane.smith@university.edu': 'password123',
-      'john.doe@university.edu': 'password123',
-      'sarah.wilson@university.edu': 'password123',
-      'mike.johnson@university.edu': 'password123',
-      'emma.davis@university.edu': 'password123'
+      'admin@faculty.edu': 'admin123',
+      'hod.cse@faculty.edu': 'password123',
+      'alice.faculty@faculty.edu': 'password123',
+      'bob.faculty@faculty.edu': 'password123'
     }
     
     if (demoPasswords[email] !== password) {

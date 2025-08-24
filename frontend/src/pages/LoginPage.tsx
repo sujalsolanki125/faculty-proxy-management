@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext'
 const LoginPage = () => {
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
-    email: 'john.doe@university.edu',
+    email: 'alice.faculty@faculty.edu',
     password: 'password123'
   })
   const [error, setError] = useState('')
@@ -32,9 +32,10 @@ const LoginPage = () => {
   }
 
   const demoUsers = [
-    { email: 'admin@university.edu', password: 'admin123', role: 'Admin' },
-    { email: 'jane.smith@university.edu', password: 'password123', role: 'HOD' },
-    { email: 'john.doe@university.edu', password: 'password123', role: 'Faculty' },
+    { email: 'admin@faculty.edu', password: 'admin123', role: 'Admin' },
+    { email: 'hod.cse@faculty.edu', password: 'password123', role: 'HOD' },
+    { email: 'alice.faculty@faculty.edu', password: 'password123', role: 'Faculty' },
+    { email: 'bob.faculty@faculty.edu', password: 'password123', role: 'Faculty' },
   ]
 
   return (
